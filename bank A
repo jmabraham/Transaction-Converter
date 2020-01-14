@@ -1,0 +1,778 @@
+Sub ComputeAll()
+Application.ScreenUpdating = False
+
+Call DateSort
+Call TransferSEL
+Call TransferBUY
+Call TransferDVR
+Call TransferDVT
+Call TransferDVC
+Call TransferMIN
+Call TransferPRD
+Call TransferDV5
+Call TransferDVU
+Call TransferCN
+Call TransferCR
+Call TransferATI
+Call TransferTCN
+Call TransferWT3
+Call TransferREC
+Call TransferEFT
+Call ExportCharts
+
+Application.ScreenUpdating = True
+End Sub
+Sub TransferSEL()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("SEL").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("SEL").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "SEL" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("SEL").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    
+     'set fiscal years
+    Sheets("SEL").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    
+    'set USD and CAD
+    Sheets("SEL").Select
+    Columns("D:D").Select
+    Selection.Copy
+    Range("T1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+       :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$T$1:$T$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+    
+    'alphabetizes (z to A) currencies so it is standardized amongst sel and buy sheets
+    Range("T1:T2").Select
+    ActiveWorkbook.Worksheets("SEL").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("SEL").Sort.SortFields.Add Key:=Range("T1"), _
+        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("SEL").Sort
+        .SetRange Range("T1:T2")
+        .Header = xlNo
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+    'copies fiscal years to table
+    Range("U7").Formula = "=P1"
+    Range("U8").Formula = "=P2"
+    Range("U9").Formula = "=P3"
+    
+    'copies currencies to table
+    Range("V6").Formula = "=T1"
+    Range("W6").Formula = "=T2"
+    
+    'USD/CAD FY-2 on table
+    Range("V7").Formula = "=SUMIFS($M:$M,$L:$L,P1,$D:$D,T1)"
+    Range("W7").Formula = "=SUMIFS($M:$M,$L:$L,P1,$D:$D,T2)"
+    
+     'USD/CAD FY-1 on table
+    Range("V8").Formula = "=SUMIFS($M:$M,$L:$L,P2,$D:$D,T1)"
+    Range("W8").Formula = "=SUMIFS($M:$M,$L:$L,P2,$D:$D,T2)"
+    
+     'USD/CAD FY on table
+    Range("V9").Formula = "=SUMIFS($M:$M,$L:$L,P3,$D:$D,T1)"
+    Range("W9").Formula = "=SUMIFS($M:$M,$L:$L,P3,$D:$D,T2)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferBUY()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("BUY").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("BUY").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "BUY" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("BUY").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    
+    'set fiscal years
+    Sheets("BUY").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    
+    'set USD and CAD
+    Sheets("BUY").Select
+    Columns("D:D").Select
+    Selection.Copy
+    Range("T1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+       :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$T$1:$T$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+    
+     'alphabetizes (z to A) currencies so it is standardized amongst sel and buy sheets
+    Range("T1:T2").Select
+    ActiveWorkbook.Worksheets("BUY").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("BUY").Sort.SortFields.Add Key:=Range("T1"), _
+        SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("BUY").Sort
+        .SetRange Range("T1:T2")
+        .Header = xlNo
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+    'copies fiscal years to table
+    Range("U7").Formula = "=P1"
+    Range("U8").Formula = "=P2"
+    Range("U9").Formula = "=P3"
+    
+    'copies currencies to table
+    Range("V6").Formula = "=T1"
+    Range("W6").Formula = "=T2"
+    
+    'USD/CAD FY-2 on table
+    Range("V7").Formula = "=SUMIFS($M:$M,$L:$L,P1,$D:$D,T1)"
+    Range("W7").Formula = "=SUMIFS($M:$M,$L:$L,P1,$D:$D,T2)"
+    
+     'USD/CAD FY-1 on table
+    Range("V8").Formula = "=SUMIFS($M:$M,$L:$L,P2,$D:$D,T1)"
+    Range("W8").Formula = "=SUMIFS($M:$M,$L:$L,P2,$D:$D,T2)"
+    
+     'USD/CAD FY on table
+    Range("V9").Formula = "=SUMIFS($M:$M,$L:$L,P3,$D:$D,T1)"
+    Range("W9").Formula = "=SUMIFS($M:$M,$L:$L,P3,$D:$D,T2)"
+    
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferDVR()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("DVR").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("DVR").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "DVR" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("DVR").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+  Sheets("DVR").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+      
+    Range("Q1").Formula = "=SUMPRODUCT(K:K,N:N*(L:L=P1))"
+    Range("Q2").Formula = "=SUMPRODUCT(K:K,N:N*(L:L=P2))"
+    Range("Q3").Formula = "=SUMPRODUCT(K:K,N:N*(L:L=P3))"
+    
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferDVT()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("DVT").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("DVT").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "DVT" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("DVT").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("DVT").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferDVC()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("DVC").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("DVC").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "DVC" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("DVC").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("DVC").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferMIN()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("MIN").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("MIN").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "MIN" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("MIN").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("MIN").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferPRD()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("PRD").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("PRD").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "PRD" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("PRD").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("PRD").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferDV5()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("DV5").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("DV5").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "DV5" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("DV5").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("DV5").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferDVU()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("DVU").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("DVU").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "DVU" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("DVU").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("DVU").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferCN()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("CN").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("CN").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "CN" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("CN").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("CN").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferCR()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("CR").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("CR").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "CR" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("CR").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("CR").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferATI()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("ATI").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("ATI").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "ATI" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("ATI").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("ATI").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+      Application.ScreenUpdating = True
+    
+End Sub
+Sub TransferTCN()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("TCN").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("TCN").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "TCN" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("TCN").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("TCN").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferWT3()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("WT3").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("WT3").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "WT3" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("WT3").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("WT3").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferREC()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("REC").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("REC").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "REC" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("REC").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("REC").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Application.ScreenUpdating = True
+End Sub
+Sub TransferEFT()
+Dim xRg As Range
+    Dim xCell As Range
+    Dim i As Long
+    Dim j As Long
+    Dim K As Long
+    Dim L As Long
+    Dim M As Long
+    
+    i = Worksheets("DATADUMP").UsedRange.Rows.Count
+    j = Worksheets("EFT").UsedRange.Rows.Count
+    If j = 1 Then
+    If Application.WorksheetFunction.CountA(Worksheets("EFT").UsedRange) = 0 Then j = 0
+    End If
+    Set xRg = Worksheets("DATADUMP").Range("E1:E" & i)
+    On Error Resume Next
+    Application.ScreenUpdating = False
+    For K = 1 To xRg.Count
+        If CStr(xRg(K).Value) = "EFT" Then
+            xRg(K).EntireRow.Copy Destination:=Worksheets("EFT").Range("A" & j + 1)
+            j = j + 1
+            
+        End If
+    Next
+    Sheets("EFT").Select
+    Columns("L:L").Select
+    Selection.Copy
+    Range("P1").Select
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$P$1:$P$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+
+    Range("Q1").Formula = "=SUMIF(L:L,P1,M:M)"
+    Range("Q2").Formula = "=SUMIF(L:L,P2,M:M)"
+    Range("Q3").Formula = "=SUMIF(L:L,P3,M:M)"
+    Range("T4").Formula = "=COUNT(S:S)"
+   
+'valuesort
+  Columns("M:M").Select
+    Selection.Copy
+    Range("S1").Select
+   Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+  Application.CutCopyMode = False
+    ActiveSheet.Range("$S$1:$S$8000").RemoveDuplicates Columns:=1, Header:=xlNo
+ Application.ScreenUpdating = True
+End Sub
+
+
+Sub ExportCharts()
+
+Dim PPT As PowerPoint.Application, i As Long
+Set PPT = New PowerPoint.Application
+PPT.Visible = True
+
+PPT.Presentations.Open ("C:\USERS\justi\DESKTOP\ClientPresentation.PPTX")
+
+Dim PPTPRES As PowerPoint.Presentation
+Set PPTPRES = PPT.ActivePresentation
+Dim pslide As PowerPoint.Slide
+i = 2
+
+Dim ws As Worksheet, ch As ChartObject
+total_slide = PPTPRES.Slides.Count
+
+For Each ws In Worksheets
+    ws.Select
+    
+
+    For Each ch In ActiveSheet.ChartObjects
+            
+            ch.Copy
+            Set pslide = PPTPRES.Slides(i)
+            pslide.Shapes.PasteSpecial ppPasteBitmap
+            i = i + 1
+        If i > total_slide Then Exit Sub
+        
+        
+
+    Next
+
+Next
+
+End Sub
+
+
